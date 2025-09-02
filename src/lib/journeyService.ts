@@ -5,6 +5,7 @@ export interface JourneyDay {
   id?: string;
   destination: string;
   date: string;
+  kilometer?: number;
   createdAt: number;
 }
 
@@ -19,7 +20,12 @@ export const addJourneyDay = async (dayData: Omit<JourneyDay, 'id' | 'createdAt'
       createdAt: Date.now()
     };
     
-    await set(newDayRef, journeyDay);
+    // Entferne undefined Werte vor dem Speichern
+    const cleanedJourneyDay = Object.fromEntries(
+      Object.entries(journeyDay).filter(([_, value]) => value !== undefined)
+    );
+    
+    await set(newDayRef, cleanedJourneyDay);
     return newDayRef.key!;
   } catch (error) {
     console.error('Error adding journey day:', error);
