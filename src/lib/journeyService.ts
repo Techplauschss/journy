@@ -73,6 +73,35 @@ export const subscribeToJourneyDays = (callback: (days: JourneyDay[]) => void) =
   return () => off(journeyRef, 'value', unsubscribe);
 };
 
+// Tag aktualisieren
+export const updateJourneyDay = async (dayId: string, dayData: Omit<JourneyDay, 'id' | 'createdAt'>): Promise<void> => {
+  try {
+    const dayRef = ref(database, `journeyDays/${dayId}`);
+    
+    // Hole die ursprünglichen Daten um createdAt zu erhalten
+    const snapshot = await get(dayRef);
+    if (!snapshot.exists()) {
+      throw new Error('Journey day not found');
+    }
+    
+    const originalData = snapshot.val();
+    const updatedJourneyDay: JourneyDay = {
+      ...dayData,
+      createdAt: originalData.createdAt // Behalte original createdAt
+    };
+    
+    // Entferne undefined Werte vor dem Speichern
+    const cleanedJourneyDay = Object.fromEntries(
+      Object.entries(updatedJourneyDay).filter(([_, value]) => value !== undefined)
+    );
+    
+    await set(dayRef, cleanedJourneyDay);
+  } catch (error) {
+    console.error('Error updating journey day:', error);
+    throw error;
+  }
+};
+
 // Tag löschen
 export const deleteJourneyDay = async (dayId: string): Promise<void> => {
   try {
