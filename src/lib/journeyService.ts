@@ -22,7 +22,7 @@ export const addJourneyDay = async (dayData: Omit<JourneyDay, 'id' | 'createdAt'
     
     // Entferne undefined Werte vor dem Speichern
     const cleanedJourneyDay = Object.fromEntries(
-      Object.entries(journeyDay).filter(([_, value]) => value !== undefined)
+      Object.entries(journeyDay).filter(([, value]) => value !== undefined)
     );
     
     await set(newDayRef, cleanedJourneyDay);
@@ -92,7 +92,7 @@ export const updateJourneyDay = async (dayId: string, dayData: Omit<JourneyDay, 
     
     // Entferne undefined Werte vor dem Speichern
     const cleanedJourneyDay = Object.fromEntries(
-      Object.entries(updatedJourneyDay).filter(([_, value]) => value !== undefined)
+      Object.entries(updatedJourneyDay).filter(([, value]) => value !== undefined)
     );
     
     await set(dayRef, cleanedJourneyDay);

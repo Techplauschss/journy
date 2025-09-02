@@ -20,8 +20,8 @@ export default function Home() {
   // Search State
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredActivities, setFilteredActivities] = useState<JourneyDay[]>([]);
-  const [selectedMonth, setSelectedMonth] = useState<string>('');
-  const [selectedYear, setSelectedYear] = useState<string>('');
+  const [selectedMonth, setSelectedMonth] = useState<string>((new Date().getMonth() + 1).toString());
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
 
   // Get latest activity for display (sorted by date, newest first)
   const latestActivity = journeyDays.length > 0 
@@ -70,10 +70,10 @@ export default function Home() {
     return uniqueYears;
   };
 
-  // Clear month/year selection
+  // Clear month/year selection (reset to current month/year)
   const clearMonthYearFilter = () => {
-    setSelectedMonth('');
-    setSelectedYear('');
+    setSelectedMonth((new Date().getMonth() + 1).toString());
+    setSelectedYear(new Date().getFullYear().toString());
   };
 
   // Hilfsfunktion für Datumssuche
@@ -137,12 +137,8 @@ export default function Home() {
     // Sort by date (newest first)
     filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
-    // If no filters are active, show only latest activity
-    if (!searchTerm.trim() && !selectedMonth && !selectedYear) {
-      setFilteredActivities(latestActivity ? [latestActivity] : []);
-    } else {
-      setFilteredActivities(filtered);
-    }
+    // Always show filtered activities (including current month/year filter)
+    setFilteredActivities(filtered);
   }, [journeyDays, searchTerm, latestActivity, selectedMonth, selectedYear]);
 
   // Neuen Eintrag hinzufügen
@@ -154,7 +150,7 @@ export default function Home() {
       await addJourneyDay({
         destination: entry.trim(),
         date: date,
-        kilometer: kilometer === '' ? 0 : Number(kilometer)
+        kilometer: kilometer === '' ? undefined : Number(kilometer)
       });
       
       // Formular zurücksetzen
@@ -187,7 +183,7 @@ export default function Home() {
       await updateJourneyDay(editEntry.entryId, {
         destination: editEntry.destination.trim(),
         date: editEntry.date,
-        kilometer: editEntry.kilometer === '' ? 0 : Number(editEntry.kilometer)
+        kilometer: editEntry.kilometer === '' ? undefined : Number(editEntry.kilometer)
       });
       
       cancelEdit();
@@ -547,7 +543,7 @@ export default function Home() {
             </p>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
               <p className="text-sm text-gray-700 dark:text-gray-300 italic">
-                "{deleteConfirmation.entryText}"
+                &quot;{deleteConfirmation.entryText}&quot;
               </p>
             </div>
             <div className="flex gap-3">

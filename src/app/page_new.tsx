@@ -326,7 +326,7 @@ export default function Home() {
             </p>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
               <p className="text-sm text-gray-700 dark:text-gray-300 italic">
-                "{deleteConfirmation.entryText}"
+                &quot;{deleteConfirmation.entryText}&quot;
               </p>
             </div>
             <div className="flex gap-3">
