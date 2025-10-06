@@ -391,15 +391,15 @@ export default function Home() {
                               month: 'long',
                               day: 'numeric'
                             })}
+                            {activity.kilometer && parseInt(String(activity.kilometer), 10) > 0 && (
+                              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                                {parseInt(String(activity.kilometer), 10)} km
+                              </span>
+                            )}
                           </p>
-                          {activity.kilometer && activity.kilometer > 0 && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
-                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                              </svg>
-                              {activity.kilometer} km
-                            </span>
-                          )}
                         </div>
                         <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
                           {activity.destination}
