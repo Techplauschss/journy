@@ -297,12 +297,10 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
               </button>
-              <Link href="/movies" legacyBehavior>
-                <a className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center" title="Filmübersicht">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.55a1 1 0 01.894.894L22 16.55A1 1 0 0121.106 18H2.894A1 1 0 012 16.55L3.55 10.894A1 1 0 014.55 10H15zM3 10V6a2 2 0 012-2h14a2 2 0 012 2v4"></path>
-                  </svg>
-                </a>
+              <Link href="/movies" className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center" title="Filmübersicht">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.55a1 1 0 01.894.894L22 16.55A1 1 0 0121.106 18H2.894A1 1 0 012 16.55L3.55 10.894A1 1 0 014.55 10H15zM3 10V6a2 2 0 012-2h14a2 2 0 012 2v4"></path>
+                </svg>
               </Link>
             </div>
           </div>
