@@ -23,6 +23,7 @@ export default function Home() {
   const [filteredActivities, setFilteredActivities] = useState<JourneyDay[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<string>((new Date().getMonth() + 1).toString());
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [collapsedYears, setCollapsedYears] = useState<Record<string, boolean>>({});
 
   // Get latest activity for display (sorted by date, newest first)
   const latestActivity = journeyDays.length > 0 
@@ -234,6 +235,17 @@ export default function Home() {
     });
   };
 
+  const groupedActivities = filteredActivities.reduce((acc, activity) => {
+    const year = new Date(activity.date).getFullYear();
+    if (!acc[year]) {
+      acc[year] = [];
+    }
+    acc[year].push(activity);
+    return acc;
+  }, {} as Record<number, JourneyDay[]>);
+
+  const sortedYears = Object.keys(groupedActivities).map(Number).sort((a, b) => b - a);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       {/* Add Entry View */}
@@ -391,55 +403,69 @@ export default function Home() {
               {/* Activities or Empty State */}
               {filteredActivities.length > 0 ? (
                 <div className="space-y-4">
-                  {filteredActivities.map((activity) => (
-                    <div key={activity.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-200 dark:border-gray-600">
-                      <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
-                            {new Date(activity.date).toLocaleDateString('de-DE', {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                            {activity.kilometer && parseInt(String(activity.kilometer), 10) > 0 && (
-                              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
-                                {parseInt(String(activity.kilometer), 10)} km
-                              </span>
-                            )}
-                          </p>
+                  {sortedYears.map(year => (
+                    <div key={year}>
+                      <h2 
+                        className="text-xl font-bold text-gray-900 dark:text-white my-4 cursor-pointer"
+                        onClick={() => setCollapsedYears(prev => ({ ...prev, [year]: !prev[year] }))}
+                      >
+                        {year}
+                      </h2>
+                      {!collapsedYears[year] && (
+                        <div className="space-y-4">
+                          {groupedActivities[year].map((activity) => (
+                            <div key={activity.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-200 dark:border-gray-600">
+                              <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
+                                    {new Date(activity.date).toLocaleDateString('de-DE', {
+                                      weekday: 'long',
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric'
+                                    })}
+                                    {activity.kilometer && parseInt(String(activity.kilometer), 10) > 0 && (
+                                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                        </svg>
+                                        {parseInt(String(activity.kilometer), 10)} km
+                                      </span>
+                                    )}
+                                  </p>
+                                </div>
+                                <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
+                                  {activity.destination}
+                                </p>
+                              </div>
+                              <div className="flex flex-col space-y-1 ml-4">
+                                <button
+                                  onClick={() => handleEditEntry(activity)}
+                                  className="text-indigo-500 hover:text-indigo-700 p-1"
+                                  title="Aktivität bearbeiten"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteEntry(activity.id!, activity.destination)}
+                                  className="text-red-500 hover:text-red-700 p-1"
+                                  title="Aktivität löschen"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          ))}
                         </div>
-                        <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
-                          {activity.destination}
-                        </p>
-                      </div>
-                      <div className="flex flex-col space-y-1 ml-4">
-                        <button
-                          onClick={() => handleEditEntry(activity)}
-                          className="text-indigo-500 hover:text-indigo-700 p-1"
-                          title="Aktivität bearbeiten"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDeleteEntry(activity.id!, activity.destination)}
-                          className="text-red-500 hover:text-red-700 p-1"
-                          title="Aktivität löschen"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  ))}
                 
                 {/* Search Results Info */}
                 {(searchTerm.trim() || selectedMonth || selectedYear) && (
