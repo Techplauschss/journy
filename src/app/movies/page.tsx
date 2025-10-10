@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { addMovie, subscribeToMovies, deleteMovie, updateMovie, Movie } from '../../lib/journeyService';
 
@@ -34,6 +34,8 @@ export default function MoviesPage() {
   const [rating, setRating] = useState(0);
   const [moviesByYear, setMoviesByYear] = useState<{[year: string]: Movie[]}>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [collapsedYears, setCollapsedYears] = useState<Record<string, boolean>>({});
+  const initialCollapseDone = useRef(false);
 
   // Edit State
   const [editEntry, setEditEntry] = useState<{ isOpen: boolean; entryId: string | null; title: string; date: string; rating: number; }>({ isOpen: false, entryId: null, title: '', date: '', rating: 0 });
@@ -53,6 +55,19 @@ export default function MoviesPage() {
         return acc;
       }, {} as {[year: string]: Movie[]});
       setMoviesByYear(groupedMovies);
+
+      if (movies.length > 0 && !initialCollapseDone.current) {
+        const currentYear = new Date().getFullYear();
+        const years = Object.keys(groupedMovies);
+        const initialCollapsedState: Record<string, boolean> = {};
+        years.forEach(year => {
+          if (parseInt(year) !== currentYear) {
+            initialCollapsedState[year] = true;
+          }
+        });
+        setCollapsedYears(initialCollapsedState);
+        initialCollapseDone.current = true;
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -159,33 +174,49 @@ export default function MoviesPage() {
           {Object.keys(moviesByYear).length > 0 ? (
             Object.keys(moviesByYear).sort((a, b) => Number(b) - Number(a)).map(year => (
               <div key={year}>
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 my-4">{year}</h3>
-                <div className="space-y-4">
-                  {moviesByYear[year].map(movie => (
-                    <div key={movie.id} className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                      <div className="flex-grow">
-                        <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white">{movie.title}</h3>
-                        <div className="flex items-center mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                          <span>{new Date(movie.date).toLocaleDateString('de-DE')}</span>
-                          <span className="mx-2">|</span>
-                          <div className="flex items-center">
-                            {[...Array(10)].map((_, i) => (
-                              <svg key={i} className={`w-4 h-4 sm:w-5 sm:h-5 ${i < movie.rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                            ))}
+                <div className="flex items-center justify-between my-4">
+                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                    {year}
+                  </h3>
+                  <button
+                    onClick={() => setCollapsedYears(prev => ({ ...prev, [year]: !prev[year] }))}
+                    className="p-1.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    {collapsedYears[year] ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" /></svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" /></svg>
+                    )}
+                  </button>
+                </div>
+                {!collapsedYears[year] && (
+                  <div className="space-y-4">
+                    {moviesByYear[year].map(movie => (
+                      <div key={movie.id} className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                        <div className="flex-grow">
+                          <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white">{movie.title}</h3>
+                          <div className="flex items-center mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                            <span>{new Date(movie.date).toLocaleDateString('de-DE')}</span>
+                            <span className="mx-2">|</span>
+                            <div className="flex items-center">
+                              {[...Array(10)].map((_, i) => (
+                                <svg key={i} className={`w-4 h-4 sm:w-5 sm:h-5 ${i < movie.rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                              ))}
+                            </div>
                           </div>
                         </div>
+                        <div className="flex flex-row sm:flex-col sm:space-y-1 ml-2 sm:ml-4">
+                          <button onClick={() => handleEditMovie(movie)} className="text-indigo-500 hover:text-indigo-700 p-1" title="Film bearbeiten">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                          </button>
+                          <button onClick={() => handleDeleteMovie(movie.id!, movie.title)} className="text-red-500 hover:text-red-700 p-1" title="Film löschen">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex flex-row sm:flex-col sm:space-y-1 ml-2 sm:ml-4">
-                        <button onClick={() => handleEditMovie(movie)} className="text-indigo-500 hover:text-indigo-700 p-1" title="Film bearbeiten">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                        </button>
-                        <button onClick={() => handleDeleteMovie(movie.id!, movie.title)} className="text-red-500 hover:text-red-700 p-1" title="Film löschen">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))
           ) : (

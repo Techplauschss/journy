@@ -405,12 +405,21 @@ export default function Home() {
                 <div className="space-y-4">
                   {sortedYears.map(year => (
                     <div key={year}>
-                      <h2 
-                        className="text-xl font-bold text-gray-900 dark:text-white my-4 cursor-pointer"
-                        onClick={() => setCollapsedYears(prev => ({ ...prev, [year]: !prev[year] }))}
-                      >
-                        {year}
-                      </h2>
+                      <div className="flex items-center justify-between my-4">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                          {year}
+                        </h2>
+                        <button
+                          onClick={() => setCollapsedYears(prev => ({ ...prev, [year]: !prev[year] }))}
+                          className="p-1.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                        >
+                          {collapsedYears[year] ? (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" /></svg>
+                          ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" /></svg>
+                          )}
+                        </button>
+                      </div>
                       {!collapsedYears[year] && (
                         <div className="space-y-4">
                           {groupedActivities[year].map((activity) => (
