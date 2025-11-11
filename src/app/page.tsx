@@ -318,6 +318,17 @@ export default function Home() {
                   </svg>
                 </button>
               </Link>
+              {/* Vacation Button (plane) */}
+              <Link href="/vacation" title="Urlaub anzeigen">
+                <button
+                  aria-label="Urlaub"
+                  className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.5 19.5 21 12l-18.5-7.5L7 12l-4.5 7.5zM7 12l5 1 5-1" />
+                  </svg>
+                </button>
+              </Link>
             </div>
           </div>
         </section>

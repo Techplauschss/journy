@@ -193,3 +193,129 @@ export const deleteMovie = async (movieId: string): Promise<void> => {
     throw error;
   }
 };
+
+export interface Trip {
+  id?: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  companions?: string;
+  createdAt: number;
+}
+
+// Reise hinzufügen
+export const addTrip = async (tripData: Omit<Trip, 'id' | 'createdAt'>): Promise<string> => {
+  try {
+    const tripsRef = ref(database, 'trips');
+    const newTripRef = push(tripsRef);
+    
+    const trip: Trip = {
+      ...tripData,
+      createdAt: Date.now()
+    };
+    
+    // Entferne undefined Werte vor dem Speichern
+    const cleanedTrip = Object.fromEntries(
+      Object.entries(trip).filter(([, value]) => value !== undefined)
+    );
+    
+    await set(newTripRef, cleanedTrip);
+    return newTripRef.key!;
+  } catch (error) {
+    console.error('Error adding trip:', error);
+    throw error;
+  }
+};
+
+// Realtime Listener für Reisen
+export const subscribeToTrips = (callback: (trips: Trip[]) => void) => {
+  const tripsRef = ref(database, 'trips');
+  
+  const unsubscribe = onValue(tripsRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const trips = Object.keys(data).map(key => ({
+        id: key,
+        ...data[key]
+      }));
+      callback(trips);
+    } else {
+      callback([]);
+    }
+  });
+  
+  return () => off(tripsRef, 'value', unsubscribe);
+};
+
+// Reise löschen
+export const deleteTrip = async (tripId: string): Promise<void> => {
+  try {
+    const tripRef = ref(database, `trips/${tripId}`);
+    await set(tripRef, null);
+  } catch (error) {
+    console.error('Error deleting trip:', error);
+    throw error;
+  }
+};
+
+export interface TripEntry {
+  id?: string;
+  tripId: string;
+  date: string;
+  title: string;
+  description: string;
+  createdAt: number;
+}
+
+// Reiseverlauf-Eintrag hinzufügen
+export const addTripEntry = async (entryData: Omit<TripEntry, 'id' | 'createdAt'>): Promise<string> => {
+  try {
+    const entriesRef = ref(database, `tripEntries/${entryData.tripId}`);
+    const newEntryRef = push(entriesRef);
+    
+    const entry: TripEntry = {
+      ...entryData,
+      createdAt: Date.now()
+    };
+    
+    await set(newEntryRef, entry);
+    return newEntryRef.key!;
+  } catch (error) {
+    console.error('Error adding trip entry:', error);
+    throw error;
+  }
+};
+
+// Realtime Listener für Reiseverlauf-Einträge einer Reise
+export const subscribeTripEntries = (tripId: string, callback: (entries: TripEntry[]) => void) => {
+  const entriesRef = ref(database, `tripEntries/${tripId}`);
+  
+  const unsubscribe = onValue(entriesRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const entries = Object.keys(data).map(key => ({
+        id: key,
+        ...data[key]
+      }));
+      // Sort by date (newest first)
+      entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      callback(entries);
+    } else {
+      callback([]);
+    }
+  });
+  
+  return () => off(entriesRef, 'value', unsubscribe);
+};
+
+// Reiseverlauf-Eintrag löschen
+export const deleteTripEntry = async (tripId: string, entryId: string): Promise<void> => {
+  try {
+    const entryRef = ref(database, `tripEntries/${tripId}/${entryId}`);
+    await set(entryRef, null);
+  } catch (error) {
+    console.error('Error deleting trip entry:', error);
+    throw error;
+  }
+};
+
