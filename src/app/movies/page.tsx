@@ -11,15 +11,40 @@ const StarRating = ({ rating, setRating }: { rating: number, setRating: (rating:
       {[...Array(10)].map((_, index) => {
         const starValue = index + 1;
         return (
-          <svg
-            key={starValue}
-            onClick={() => setRating(starValue)}
-            className={`w-6 h-6 cursor-pointer ${starValue <= rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`}
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-          </svg>
+            <svg
+              key={starValue}
+              onClick={() => setRating(starValue)}
+              onMouseEnter={(e: React.MouseEvent<SVGSVGElement>) => {
+              const el = e.currentTarget as unknown as HTMLElement;
+              // make this and all previous sibling stars golden
+              let prev: Element | null = el;
+              while (prev) {
+                (prev as HTMLElement).classList.add('text-yellow-400');
+                (prev as HTMLElement).classList.remove('text-gray-300', 'dark:text-gray-600');
+                prev = prev.previousElementSibling;
+              }
+              }}
+              onMouseLeave={(e: React.MouseEvent<SVGSVGElement>) => {
+              const container = e.currentTarget.parentElement;
+              if (!container) return;
+              // restore colors based on current rating
+              Array.from(container.children).forEach((child, i) => {
+                const val = i + 1;
+                if (val <= rating) {
+                child.classList.add('text-yellow-400');
+                child.classList.remove('text-gray-300', 'dark:text-gray-600');
+                } else {
+                child.classList.remove('text-yellow-400');
+                child.classList.add('text-gray-300', 'dark:text-gray-600');
+                }
+              });
+              }}
+              className={`w-6 h-6 cursor-pointer transition-transform duration-200 hover:scale-125 ${starValue <= rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`}
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+            </svg>
         );
       })}
     </div>
@@ -138,7 +163,7 @@ export default function MoviesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl mb-6">
+        <div className="bg-white dark:bg-gray-900 rounded-4xl p-6 shadow-2xl mb-6 hover:shadow-2xl hover:scale-102 transition-all duration-300">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Neuen Film hinzufügen</h1>
           <div className="space-y-4">
             <input
@@ -162,7 +187,7 @@ export default function MoviesPage() {
             <button
               onClick={handleAddMovie}
               disabled={isLoading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3 px-6 rounded-xl transition-colors shadow-md"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3 px-6 rounded-xl transition-colors shadow-md hover:shadow-lg hover:scale-101 duration-600"
             >
               {isLoading ? 'Wird hinzugefügt...' : 'Film hinzufügen'}
             </button>
@@ -175,12 +200,15 @@ export default function MoviesPage() {
             Object.keys(moviesByYear).sort((a, b) => Number(b) - Number(a)).map(year => (
               <div key={year}>
                 <div className="flex items-center justify-between my-4">
-                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                    <button
+                    className="text-xl font-semibold text-gray-800 dark:text-gray-200 px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors hover:shadow-2xl hover:scale-110 transition-all duration-300"
+                    onClick={() => setCollapsedYears(prev => ({ ...prev, [year]: !prev[year] }))}
+                    >
                     {year}
-                  </h3>
+                    </button>
                   <button
                     onClick={() => setCollapsedYears(prev => ({ ...prev, [year]: !prev[year] }))}
-                    className="p-1.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    className="p-1.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600  hover:shadow-2xl hover:scale-110 transition-all duration-300"
                   >
                     {collapsedYears[year] ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" /></svg>
@@ -192,7 +220,7 @@ export default function MoviesPage() {
                 {!collapsedYears[year] && (
                   <div className="space-y-4">
                     {moviesByYear[year].map(movie => (
-                      <div key={movie.id} className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                      <div key={movie.id} className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-between  hover:shadow-2xl hover:scale-102 transition-all duration-300">
                         <div className="flex-grow">
                           <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white">{movie.title}</h3>
                           <div className="flex items-center mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
@@ -225,11 +253,17 @@ export default function MoviesPage() {
             </div>
           )}
         </div>
-        <div className="mt-6 text-center">
-            <Link href="/" className="text-indigo-600 hover:underline">
-                Zurück zur Startseite
-            </Link>
-        </div>
+        <div className="flex justify-center mt-6">
+              <button
+          onClick={() => window.location.href = '/'}
+          className="w-12 h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+          title="Neuen Eintrag hinzufügen"
+              >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+              </button>
+          </div>
       </div>
 
       {/* Delete Confirmation Modal */}

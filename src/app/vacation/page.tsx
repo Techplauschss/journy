@@ -68,11 +68,6 @@ export default function VacationPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Reisen</h1>
-          <p className="text-gray-600 dark:text-gray-300">Dokumentiere deine Urlaube und Reisen</p>
-        </div>
 
         {/* Add Trip Form */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl mb-6">
@@ -198,12 +193,16 @@ export default function VacationPage() {
 
         {/* Back Button */}
         <div className="flex justify-center mt-6">
-          <Link href="/">
-            <button className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors shadow-sm">
-              Zurück zur Übersicht
-            </button>
-          </Link>
-        </div>
+              <button
+          onClick={() => window.location.href = '/'}
+          className="w-12 h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+          title="Neuen Eintrag hinzufügen"
+              >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+              </button>
+          </div>
       </div>
     </div>
   );

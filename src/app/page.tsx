@@ -253,16 +253,16 @@ export default function Home() {
         <section className="min-h-screen flex items-center justify-center px-4">
           <div className="max-w-md w-full text-center">
             {/* Input Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-4xl p-6 shadow-2xl mb-4 over:shadow-lg hover:scale-105 duration-600">
               <div className="space-y-4">
                 <div>
                   <textarea
                     id="destination"
-                    placeholder="Beschreibe deine Aktivitäten..."
+                    placeholder="Beschreibe deine Aktivität"
                     value={entry}
                     onChange={(e) => setEntry(e.target.value)}
                     rows={2}
-                    className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
+                    className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none hover:shadow-lg disabled:cursor-not-allowed hover:scale-102 duration-600"
                   />
                 </div>
                 
@@ -273,25 +273,25 @@ export default function Home() {
                       id="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all hover:shadow-lg disabled:cursor-not-allowed hover:scale-102 duration-600"
                     />
                   </div>
                   <div>
                     <input
                       type="number"
                       id="kilometer"
-                      placeholder="Kilometer (optional)"
+                      placeholder="Kilometer"
                       value={kilometer}
                       onChange={(e) => setKilometer(e.target.value === '' ? '' : Number(e.target.value))}
-                      className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all hover:shadow-lg disabled:cursor-not-allowed hover:scale-103 duration-600"
                     />
                   </div>
                 </div>
                 
-                <button 
+                <button
                   onClick={handleAddEntry}
                   disabled={isLoading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-4 px-6 rounded-xl transition-colors shadow-md hover:shadow-lg disabled:cursor-not-allowed"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-4 px-6 rounded-xl transition-colors shadow-md hover:shadow-lg disabled:cursor-not-allowed hover:scale-103 duration-600"
                 >
                   {isLoading ? 'Wird gespeichert...' : 'Aktivität hinzufügen'}
                 </button>
@@ -302,7 +302,7 @@ export default function Home() {
             <div className="flex justify-center gap-4 mt-4">
               <button
                 onClick={() => setCurrentView('list')}
-                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center hover:shadow-lg disabled:cursor-not-allowed hover:scale-110 duration-200"
                 title="Aktivitäten anzeigen"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,7 +311,7 @@ export default function Home() {
               </button>
               <Link href="/movies" title="Filme anzeigen">
                 <button
-                  className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
+                  className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center hover:shadow-lg disabled:cursor-not-allowed hover:scale-110 duration-200"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9A2.25 2.25 0 0 0 13.5 5.25h-9A2.25 2.25 0 0 0 2.25 7.5v9A2.25 2.25 0 0 0 4.5 18.75Z" />
@@ -322,7 +322,7 @@ export default function Home() {
               <Link href="/vacation" title="Urlaub anzeigen">
                 <button
                   aria-label="Urlaub"
-                  className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
+                  className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center hover:shadow-lg disabled:cursor-not-allowed hover:scale-110 duration-200"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.5 19.5 21 12l-18.5-7.5L7 12l-4.5 7.5zM7 12l5 1 5-1" />
