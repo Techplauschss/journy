@@ -6,6 +6,7 @@ export interface JourneyDay {
   destination: string;
   date: string;
   kilometer?: number;
+  gratitude?: string;
   createdAt: number;
 }
 
@@ -86,6 +87,7 @@ export const updateJourneyDay = async (dayId: string, dayData: Omit<JourneyDay, 
     
     const originalData = snapshot.val();
     const updatedJourneyDay: JourneyDay = {
+      ...originalData,
       ...dayData,
       createdAt: originalData.createdAt // Behalte original createdAt
     };
@@ -318,4 +320,3 @@ export const deleteTripEntry = async (tripId: string, entryId: string): Promise<
     throw error;
   }
 };
-

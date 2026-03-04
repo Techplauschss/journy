@@ -14,6 +14,8 @@ export default function Home() {
   const [kilometer, setKilometer] = useState<number | ''>('');
   const [journeyDays, setJourneyDays] = useState<JourneyDay[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [gratitudeInputs, setGratitudeInputs] = useState<Record<string, string>>({});
+  const [expandedGratitude, setExpandedGratitude] = useState<Record<string, boolean>>({});
 
   // Page State
   const [currentView, setCurrentView] = useState<'add' | 'list'>('add');
@@ -233,6 +235,50 @@ export default function Home() {
       date: '',
       kilometer: ''
     });
+  };
+
+  const handleSaveGratitude = async (activity: JourneyDay) => {
+    const text = gratitudeInputs[activity.id!]?.trim();
+    if (!text) return;
+
+    const currentGratitude = activity.gratitude || '';
+    const newEntry = `• ${text}`;
+    const updatedGratitude = currentGratitude 
+      ? `${currentGratitude}\n${newEntry}`
+      : newEntry;
+
+    try {
+      await updateJourneyDay(activity.id!, {
+        destination: activity.destination,
+        date: activity.date,
+        kilometer: activity.kilometer,
+        gratitude: updatedGratitude
+      });
+      setGratitudeInputs(prev => ({ ...prev, [activity.id!]: '' }));
+    } catch (error) {
+      console.error('Fehler beim Speichern:', error);
+      alert('Fehler beim Speichern.');
+    }
+  };
+
+  const handleDeleteGratitude = async (activity: JourneyDay, indexToDelete: number) => {
+    if (!activity.gratitude) return;
+
+    const lines = activity.gratitude.split('\n');
+    const newLines = lines.filter((_, index) => index !== indexToDelete);
+    const newGratitude = newLines.join('\n');
+
+    try {
+      await updateJourneyDay(activity.id!, {
+        destination: activity.destination,
+        date: activity.date,
+        kilometer: activity.kilometer,
+        gratitude: newGratitude
+      });
+    } catch (error) {
+      console.error('Fehler beim Löschen des Eintrags:', error);
+      alert('Fehler beim Löschen des Eintrags.');
+    }
   };
 
   const groupedActivities = filteredActivities.reduce((acc, activity) => {
@@ -458,6 +504,49 @@ export default function Home() {
                                 <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
                                   {activity.destination}
                                 </p>
+
+                                {expandedGratitude[activity.id!] && (
+                                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                  {activity.gratitude && (
+                                    <div className="mb-3 space-y-1">
+                                      {activity.gratitude.split('\n').map((line, index) => (
+                                        <div key={index} className="flex items-start justify-between group text-sm text-gray-600 dark:text-gray-300 pl-1">
+                                          <span className="whitespace-pre-wrap flex-1">{line}</span>
+                                          <button
+                                            onClick={() => handleDeleteGratitude(activity, index)}
+                                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 ml-2 p-0.5 transition-all"
+                                            title="Eintrag löschen"
+                                          >
+                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      placeholder="Wofür bist du dankbar?"
+                                      value={gratitudeInputs[activity.id!] || ''}
+                                      onChange={(e) => setGratitudeInputs(prev => ({ ...prev, [activity.id!]: e.target.value }))}
+                                      onKeyDown={(e) => e.key === 'Enter' && handleSaveGratitude(activity)}
+                                      className="flex-1 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    />
+                                    <button
+                                      onClick={() => handleSaveGratitude(activity)}
+                                      disabled={!gratitudeInputs[activity.id!]?.trim()}
+                                      className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white p-2 rounded-lg transition-colors flex-shrink-0"
+                                      title="Hinzufügen"
+                                    >
+                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                                )}
                               </div>
                               <div className="flex flex-col space-y-1 ml-4">
                                 <button
@@ -477,6 +566,17 @@ export default function Home() {
                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                   </svg>
+                                </button>
+                                <button
+                                  onClick={() => setExpandedGratitude(prev => ({ ...prev, [activity.id!]: !prev[activity.id!] }))}
+                                  className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 p-1 transition-colors"
+                                  title={expandedGratitude[activity.id!] ? "Einklappen" : "Positive Dinge anzeigen"}
+                                >
+                                  {expandedGratitude[activity.id!] ? (
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+                                  ) : (
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                  )}
                                 </button>
                               </div>
                             </div>
