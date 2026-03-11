@@ -120,6 +120,7 @@ export interface Movie {
   title: string;
   date: string;
   rating: number;
+  mustWatch?: boolean;
   createdAt: number;
 }
 
@@ -134,7 +135,12 @@ export const addMovie = async (movieData: Omit<Movie, 'id' | 'createdAt'>): Prom
       createdAt: Date.now()
     };
     
-    await set(newMovieRef, movie);
+    // Entferne undefined Werte vor dem Speichern
+    const cleanedMovie = Object.fromEntries(
+      Object.entries(movie).filter(([, value]) => value !== undefined)
+    );
+    
+    await set(newMovieRef, cleanedMovie);
     return newMovieRef.key!;
   } catch (error) {
     console.error('Error adding movie:', error);
@@ -174,11 +180,17 @@ export const updateMovie = async (movieId: string, movieData: Omit<Movie, 'id' |
     
     const originalData = snapshot.val();
     const updatedMovie: Movie = {
+      ...originalData,
       ...movieData,
       createdAt: originalData.createdAt
     };
     
-    await set(movieRef, updatedMovie);
+    // Entferne undefined Werte vor dem Speichern
+    const cleanedMovie = Object.fromEntries(
+      Object.entries(updatedMovie).filter(([, value]) => value !== undefined)
+    );
+    
+    await set(movieRef, cleanedMovie);
   } catch (error) {
     console.error('Error updating movie:', error);
     throw error;
