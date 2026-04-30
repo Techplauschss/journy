@@ -121,8 +121,69 @@ export interface Movie {
   date: string;
   rating: number;
   mustWatch?: boolean;
+  folderId?: string;
   createdAt: number;
 }
+
+export interface MovieFolder {
+  id?: string;
+  name: string;
+  createdAt: number;
+}
+
+// Ordner hinzufügen
+export const addMovieFolder = async (folderData: Omit<MovieFolder, 'id' | 'createdAt'>): Promise<string> => {
+  try {
+    const foldersRef = ref(database, 'movieFolders');
+    const newFolderRef = push(foldersRef);
+    
+    const folder: MovieFolder = {
+      ...folderData,
+      createdAt: Date.now()
+    };
+    
+    await set(newFolderRef, folder);
+    return newFolderRef.key!;
+  } catch (error) {
+    console.error('Error adding movie folder:', error);
+    throw error;
+  }
+};
+
+// Realtime Listener für Ordner
+export const subscribeToMovieFolders = (callback: (folders: MovieFolder[]) => void) => {
+  const foldersRef = ref(database, 'movieFolders');
+  
+  const unsubscribe = onValue(foldersRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const folders = Object.keys(data).map(key => ({
+        id: key,
+        ...data[key]
+      }));
+      callback(folders);
+    } else {
+      callback([]);
+    }
+  });
+  
+  return () => off(foldersRef, 'value', unsubscribe);
+};
+
+// Ordner aktualisieren
+export const updateMovieFolder = async (folderId: string, name: string): Promise<void> => {
+  const folderRef = ref(database, `movieFolders/${folderId}`);
+  const snapshot = await get(folderRef);
+  if (!snapshot.exists()) throw new Error('Folder not found');
+  const originalData = snapshot.val();
+  await set(folderRef, { ...originalData, name });
+};
+
+// Ordner löschen
+export const deleteMovieFolder = async (folderId: string): Promise<void> => {
+  const folderRef = ref(database, `movieFolders/${folderId}`);
+  await set(folderRef, null);
+};
 
 // Film hinzufügen
 export const addMovie = async (movieData: Omit<Movie, 'id' | 'createdAt'>): Promise<string> => {

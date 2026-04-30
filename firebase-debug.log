@@ -1,0 +1,42 @@
+[debug] [2026-03-11T16:43:53.127Z] ----------------------------------------------------------------------
+[debug] [2026-03-11T16:43:53.135Z] Command:       /Users/martinsauer/.nodenv/versions/22.21.0/bin/node /opt/homebrew/bin/firebase deploy
+[debug] [2026-03-11T16:43:53.135Z] CLI Version:   14.18.0
+[debug] [2026-03-11T16:43:53.135Z] Platform:      darwin
+[debug] [2026-03-11T16:43:53.135Z] Node Version:  v22.21.0
+[debug] [2026-03-11T16:43:53.136Z] Time:          Wed Mar 11 2026 17:43:53 GMT+0100 (Central European Standard Time)
+[debug] [2026-03-11T16:43:53.136Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-11T16:43:53.137Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-03-11T16:43:53.320Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-11T16:43:53.321Z] > authorizing via signed-in user (mail.martin.sauer@gmail.com)
+[debug] [2026-03-11T16:43:53.321Z] [iam] checking project journy-e76b1 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-03-11T16:43:53.321Z] Checked if tokens are valid: false, expires at: 1773139249669
+[debug] [2026-03-11T16:43:53.321Z] Checked if tokens are valid: false, expires at: 1773139249669
+[debug] [2026-03-11T16:43:53.321Z] > refreshing access token with scopes: []
+[debug] [2026-03-11T16:43:53.322Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-03-11T16:43:53.322Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-03-11T16:43:53.483Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-03-11T16:43:53.484Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-03-11T16:43:53.492Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/journy-e76b1:testIamPermissions [none]
+[debug] [2026-03-11T16:43:53.493Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/journy-e76b1:testIamPermissions x-goog-quota-user=projects/journy-e76b1
+[debug] [2026-03-11T16:43:53.493Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/journy-e76b1:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-03-11T16:43:53.647Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-03-11T16:43:53.647Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-03-11T16:43:53.887Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/journy-e76b1:testIamPermissions 200
+[debug] [2026-03-11T16:43:53.888Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/journy-e76b1:testIamPermissions {}
+[debug] [2026-03-11T16:43:53.888Z] [iam] error while checking permissions, command may fail: Authorization failed. This account is missing the following required permissions on project journy-e76b1:
+
+  firebase.projects.get
+  firebasehosting.sites.update
+[debug] [2026-03-11T16:43:53.889Z] Checked if tokens are valid: true, expires at: 1773251032484
+[debug] [2026-03-11T16:43:53.889Z] Checked if tokens are valid: true, expires at: 1773251032484
+[debug] [2026-03-11T16:43:53.889Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/journy-e76b1 [none]
+[debug] [2026-03-11T16:43:54.296Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/journy-e76b1 403
+[debug] [2026-03-11T16:43:54.296Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/journy-e76b1 {"error":{"code":403,"message":"The caller does not have permission","status":"PERMISSION_DENIED"}}
+[debug] [2026-03-11T16:43:54.297Z] Request to https://firebase.googleapis.com/v1beta1/projects/journy-e76b1 had HTTP Error: 403, The caller does not have permission
+[debug] [2026-03-11T16:43:54.298Z] FirebaseError: Request to https://firebase.googleapis.com/v1beta1/projects/journy-e76b1 had HTTP Error: 403, The caller does not have permission
+    at responseToError (/opt/homebrew/lib/node_modules/firebase-tools/lib/responseToError.js:52:12)
+    at RetryOperation._fn (/opt/homebrew/lib/node_modules/firebase-tools/lib/apiv2.js:312:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[error] 
+[error] Error: Failed to get Firebase project journy-e76b1. Please make sure the project exists and your account has permission to access it.

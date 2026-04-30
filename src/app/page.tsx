@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { addJourneyDay, subscribeToJourneyDays, deleteJourneyDay, updateJourneyDay, JourneyDay } from '../lib/journeyService';
 
@@ -16,9 +16,11 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [gratitudeInputs, setGratitudeInputs] = useState<Record<string, string>>({});
   const [expandedGratitude, setExpandedGratitude] = useState<Record<string, boolean>>({});
+  const initialDateSetDone = useRef(false);
 
   // Page State
-  const [currentView, setCurrentView] = useState<'add' | 'list'>('add');
+  const [currentView, setCurrentView] = useState<'add' | 'list' | 'calendar'>('add');
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   // Search State
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,6 +64,16 @@ export default function Home() {
   useEffect(() => {
     const unsubscribe = subscribeToJourneyDays((days) => {
       setJourneyDays(days);
+
+      if (!initialDateSetDone.current) {
+        if (days.length > 0) {
+          const latest = [...days].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+          const nextDay = new Date(latest.date);
+          nextDay.setDate(nextDay.getDate() + 1);
+          setDate(nextDay.toISOString().split('T')[0]);
+        }
+        initialDateSetDone.current = true;
+      }
     });
 
     return () => unsubscribe();
@@ -159,7 +171,9 @@ export default function Home() {
       
       // Formular zurücksetzen
       setEntry('');
-      setDate(today);
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setDate(nextDay.toISOString().split('T')[0]);
       setKilometer('');
     } catch (error) {
       console.error('Fehler beim Hinzufügen des Eintrags:', error);
@@ -281,6 +295,34 @@ export default function Home() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (journeyDays.length === 0) {
+      alert('Keine Aktivitäten vorhanden.');
+      return;
+    }
+    
+    // Sortierung chronologisch für den Export
+    const sortedDays = [...journeyDays].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    const headers = ['Datum', 'Aktivität', 'Kilometer', 'Wofür bin ich dankbar?'];
+    const csvRows = sortedDays.map(day => {
+      const destination = `"${(day.destination || '').replace(/"/g, '""')}"`;
+      const kilometer = day.kilometer || '';
+      const gratitude = `"${(day.gratitude || '').replace(/"/g, '""')}"`;
+      return `${day.date},${destination},${kilometer},${gratitude}`;
+    });
+    
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM for proper UTF-8 handling in Excel
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'aktivitaeten.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const groupedActivities = filteredActivities.reduce((acc, activity) => {
     const year = new Date(activity.date).getFullYear();
     if (!acc[year]) {
@@ -353,6 +395,15 @@ export default function Home() {
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setCurrentView('calendar')}
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center hover:shadow-lg hover:scale-110 duration-200"
+                title="Kalender anzeigen"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </button>
               <Link href="/movies" title="Filme anzeigen">
@@ -673,21 +724,141 @@ export default function Home() {
             )}
             </div>
             
-            {/* Add Entry Button */}
-            <div className="flex justify-center mt-6">
+            {/* Bottom Nav Buttons */}
+            <div className="flex justify-center gap-4 mt-6">
               <button
                 onClick={() => setCurrentView('add')}
-                className="w-12 h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+                className="w-12 h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center hover:scale-110"
                 title="Neuen Eintrag hinzufügen"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </button>
+              <button
+                onClick={() => setCurrentView('calendar')}
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center hover:scale-110"
+                title="Kalender anzeigen"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </button>
             </div>
           </div>
         </section>
       )}
+
+      {/* Calendar View */}
+      {currentView === 'calendar' && (
+        <section className="min-h-screen flex flex-col justify-center py-4 px-4">
+          <div className="max-w-md mx-auto w-full">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1))} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <div className="flex items-center gap-1">
+                  <select
+                    value={calendarDate.getMonth()}
+                    onChange={(e) => setCalendarDate(new Date(calendarDate.getFullYear(), parseInt(e.target.value), 1))}
+                    className="text-xl font-bold text-gray-900 dark:text-white bg-transparent border-none focus:ring-0 cursor-pointer appearance-none text-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-2 py-1 transition-colors outline-none"
+                  >
+                    {['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'].map((m, i) => (
+                      <option key={i} value={i} className="text-base bg-white dark:bg-gray-800">{m}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={calendarDate.getFullYear()}
+                    onChange={(e) => setCalendarDate(new Date(parseInt(e.target.value), calendarDate.getMonth(), 1))}
+                    className="text-xl font-bold text-gray-900 dark:text-white bg-transparent border-none focus:ring-0 cursor-pointer appearance-none text-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-2 py-1 transition-colors outline-none"
+                  >
+                    {Array.from(new Set([...getAvailableYears(), new Date().getFullYear(), calendarDate.getFullYear()])).sort((a, b) => b - a).map(year => (
+                      <option key={year} value={year} className="text-base bg-white dark:bg-gray-800">{year}</option>
+                    ))}
+                  </select>
+                </div>
+                <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-7 gap-2 mb-2">
+                {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(d => (
+                  <div key={d} className="text-center text-sm font-semibold text-gray-500 dark:text-gray-400">{d}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-2">
+                {Array.from({ length: (new Date(calendarDate.getFullYear(), calendarDate.getMonth(), 1).getDay() === 0 ? 6 : new Date(calendarDate.getFullYear(), calendarDate.getMonth(), 1).getDay() - 1) + new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 0).getDate() > 35 ? 42 : 35 }, (_, i) => {
+                  const year = calendarDate.getFullYear();
+                  const month = calendarDate.getMonth();
+                  const daysInMonth = new Date(year, month + 1, 0).getDate();
+                  const firstDayOfWeek = new Date(year, month, 1).getDay();
+                  const startOffset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+                  
+                  const dayNum = i - startOffset + 1;
+                  if (dayNum <= 0 || dayNum > daysInMonth) {
+                    return <div key={i} className="p-2"></div>;
+                  }
+                  
+                  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+                  const dayActivities = journeyDays.filter(d => d.date === dateStr);
+                  const hasActivity = dayActivities.length > 0;
+                  
+                  return (
+                    <div key={i} className={`relative group p-2 rounded-xl flex items-center justify-center aspect-square ${hasActivity ? 'bg-green-500 text-white shadow-md' : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'} transition-all`}>
+                      <span className="font-medium text-sm">{dayNum}</span>
+                      {hasActivity && (
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 p-3 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none z-50 shadow-2xl transition-all duration-200">
+                          {dayActivities.map(a => (
+                            <div key={a.id} className="mb-2 last:mb-0">
+                              <p className="font-semibold text-green-400">{a.destination}</p>
+                              {a.kilometer && <p className="text-gray-300">{a.kilometer} km</p>}
+                              {a.gratitude && <p className="text-gray-400 truncate">{a.gratitude.split('\n')[0]}</p>}
+                            </div>
+                          ))}
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Navigation Buttons for Calendar View */}
+            <div className="flex justify-center gap-4 mt-6">
+              <button
+                onClick={() => setCurrentView('add')}
+                className="w-12 h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center hover:scale-110"
+                title="Neuen Eintrag hinzufügen"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              </button>
+              <button
+                onClick={() => setCurrentView('list')}
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center hover:scale-110"
+                title="Aktivitäten anzeigen"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CSV Export Button */}
+      <div className="max-w-7xl mx-auto mt-8 flex justify-center pb-8">
+        <button
+          onClick={handleExportCSV}
+          className="px-6 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm text-sm font-medium flex items-center gap-2"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Alle Aktivitäten als CSV exportieren
+        </button>
+      </div>
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmation.isOpen && (
